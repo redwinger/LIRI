@@ -3,14 +3,10 @@
 var Twitter = require('twitter');
 var Spotify = require('node-spotify-api');
 var request = require('request');
+var fs = require('fs');
 
-var culture = process.argv.slice(3);
 var action = process.argv[2];
-
-exports.action = action;
-exports.culture = culture;
-
-
+var culture = process.argv.slice(3);
 
 var client = new Twitter ({
   consumer_key: 'JQkxFDnj20ztY1GLxs4eR9sL2',
@@ -21,12 +17,18 @@ var client = new Twitter ({
 
 var params = {screen_name: 'Beer_BellyFlop'};
 
+
+// Setting the default for movie-this
+action === 'movie-this' && culture.length < 1 ? culture = '2001' : culture = culture;
+// setting the default for spotify-this-song
+action === 'spotify-this-song' && culture.length < 1 ? culture = 'skate or die' : culture = culture;
+
 var tweets = function() {
+
 	client.get('statuses/user_timeline/count=20', params, function(error, tweets, response) {
 		if (!error) {
 			for (var i = 0; i < tweets.length; i++) {
 				console.log('You tweeted ' + tweets[i].text + 'on ' + tweets[i].created_at);
-			
 			}
 		} else {
 
@@ -42,6 +44,7 @@ var spotify = new Spotify({
 });
  
 var song = function() {
+
 	spotify.search({ type: 'track', query: culture }, function(err, songData) {
 		if (err) {
 			return console.log('Error occurred: ' + err);
@@ -57,6 +60,7 @@ var song = function() {
 };
 
 var movie = function() {
+
 	request('http://www.omdbapi.com/?apikey=40e9cece&t=' + culture, function (error, response, movieData) {
 	if (error) {
 		console.log('error:', error); 
@@ -75,8 +79,35 @@ var movie = function() {
 	})
 };
 
+var doThis = function() {
 
-module.exports.movie = movie;
-module.exports.song = song;
-module.exports.tweets = tweets;
+	fs.readFile('random.txt', 'utf8', function(err, data){
+
+	if(err) {
+		console.log(err)
+	} else {
+
+		input = data.slice(0);
+		culture = data.slice(1);
+
+		if (input === 'spotify-this-song') {
+
+			song()
+		} else if (input === 'movie-this') {
+
+			movie()
+		}
+
+		console.log(input)
+	}	
+})};
+
+	
+
+exports.action = action;
+exports.culture = culture;
+exports.movie = movie;
+exports.song = song;
+exports.tweets = tweets;
+exports.doThis = doThis;
 

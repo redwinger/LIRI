@@ -13,6 +13,10 @@ if (keys.action == "spotify-this-song") {
 
 	keys.tweets() 
 
+} else if (keys.action == "do-what-it-says") {
+
+	keys.doThis()
+
 } else {
 
 	console.log('invalid command');
